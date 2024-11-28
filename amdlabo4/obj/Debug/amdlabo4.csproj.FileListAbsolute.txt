@@ -1,0 +1,10 @@
+C:\Users\yoemm\Desktop\PROGRAMACION 4\amdlabo4\amdlabo4\obj\Debug\amdlabo4.csproj.AssemblyReference.cache
+C:\Users\yoemm\Desktop\PROGRAMACION 4\amdlabo4\amdlabo4\obj\Debug\amdlabo4.Form1.resources
+C:\Users\yoemm\Desktop\PROGRAMACION 4\amdlabo4\amdlabo4\obj\Debug\amdlabo4.Properties.Resources.resources
+C:\Users\yoemm\Desktop\PROGRAMACION 4\amdlabo4\amdlabo4\obj\Debug\amdlabo4.csproj.GenerateResource.cache
+C:\Users\yoemm\Desktop\PROGRAMACION 4\amdlabo4\amdlabo4\obj\Debug\amdlabo4.csproj.CoreCompileInputs.cache
+C:\Users\yoemm\Desktop\PROGRAMACION 4\amdlabo4\amdlabo4\bin\Debug\amdlabo4.exe.config
+C:\Users\yoemm\Desktop\PROGRAMACION 4\amdlabo4\amdlabo4\bin\Debug\amdlabo4.exe
+C:\Users\yoemm\Desktop\PROGRAMACION 4\amdlabo4\amdlabo4\bin\Debug\amdlabo4.pdb
+C:\Users\yoemm\Desktop\PROGRAMACION 4\amdlabo4\amdlabo4\obj\Debug\amdlabo4.exe
+C:\Users\yoemm\Desktop\PROGRAMACION 4\amdlabo4\amdlabo4\obj\Debug\amdlabo4.pdb
