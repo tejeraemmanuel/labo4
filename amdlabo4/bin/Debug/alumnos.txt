@@ -118,27 +118,3 @@ Gutiérrez
 20123456
 2000-09-09
 Avenida Río 1717
-21
-asddasdasd
-1231
-12345678
-2024-11-30
-dasda 2121
-22
-aaaaaaaaa
-aaaaaaaaa
-2222
-2024-11-30
-asdasda 21231
-23
-ddsadasd
-dasda
-12132132
-2024-11-30
-asdasda 2121
-24
-dsadasda
-dsadsad
-66666666
-2024-11-30
-dsadsadsad 1212

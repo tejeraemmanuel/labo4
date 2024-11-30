@@ -33,32 +33,31 @@ namespace amdlabo4
 
         private void btnAgregar_Click(object sender, EventArgs e)
         {
-            // Validar longitud del DNI
-            if (txtDni.Text.Length != 8)
+            // Validar que todos los campos tengan datos
+            if (!SonCamposValidos())
             {
-                MessageBox.Show("El DNI debe tener exactamente 8 dígitos.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return; // Detener la ejecución si no cumple
+                return; // Detener si hay campos vacíos o incorrectos
             }
 
-            // Validar que el DNI contenga solo números
-            if (!txtDni.Text.All(char.IsDigit))
+            // Validar que el DNI no esté duplicado
+            if (!DniUnico(txtDni.Text))
             {
-                MessageBox.Show("El DNI debe contener solo números.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return; // Detener la ejecución si no cumple
+                MessageBox.Show("El DNI ingresado ya existe. Por favor, ingresa un DNI único.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
             }
 
-            // Si pasa la validación, continúa con el registro
+            // Validar la fecha
+            if (!EsFechaValida(dtpFechaNacimiento.Value))
+            {
+                return;
+            }
+
             int nuevoId = GenerarIdSiguiente();
 
-            // Agregar los datos al DataGridView
+            // Agregar los datos al DataGridView y guardar en archivo
             dataGridView1.Rows.Add(nuevoId, txtNombre.Text, txtApellido.Text, txtDni.Text, dtpFechaNacimiento.Value.ToString("yyyy-MM-dd"), txtDomicilio.Text);
-
-            // Guardar los datos en el archivo
             GrabarDatos();
-
-            // Mostrar mensaje con el nuevo ID
             MessageBox.Show($"El registro se agregó con éxito. El ID asignado es: {nuevoId}", "Registro Agregado", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
             LimpiarCampos();
         }
 
@@ -66,28 +65,39 @@ namespace amdlabo4
 
 
 
+
+
+
         private void button2_Click(object sender, EventArgs e)
         {
+            // Validar que todos los campos tengan datos
+            if (!SonCamposValidos())
+            {
+                return; // Detener si hay campos vacíos o incorrectos
+            }
+
+            // Verificar si el DNI es único, pero solo si se ha cambiado
+            if (txtDni.Text != dataGridView1.SelectedRows[0].Cells[3].Value?.ToString())
+            {
+                if (!DniUnico(txtDni.Text))
+                {
+                    MessageBox.Show("El DNI ingresado ya existe. Por favor, ingresa un DNI único.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+            }
+
             if (dataGridView1.SelectedRows.Count > 0)
             {
-                // Validar longitud del DNI
-                if (txtDni.Text.Length != 8)
+                // Validar el DNI
+                if (txtDni.Text.Length != 8 || !txtDni.Text.All(char.IsDigit))
                 {
-                    MessageBox.Show("El DNI debe tener exactamente 8 dígitos.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return; // Detener la ejecución si no cumple
-                }
-
-                // Validar que el DNI contenga solo números
-                if (!txtDni.Text.All(char.IsDigit))
-                {
-                    MessageBox.Show("El DNI debe contener solo números.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return; // Detener la ejecución si no cumple
+                    MessageBox.Show("El DNI debe tener exactamente 8 dígitos numéricos.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
                 }
 
                 try
                 {
                     DataGridViewRow filaSeleccionada = dataGridView1.SelectedRows[0];
-
                     filaSeleccionada.Cells[1].Value = txtNombre.Text;
                     filaSeleccionada.Cells[2].Value = txtApellido.Text;
                     filaSeleccionada.Cells[3].Value = txtDni.Text;
@@ -96,7 +106,6 @@ namespace amdlabo4
 
                     GrabarDatos();
                     LimpiarCampos();
-
                     MessageBox.Show("Registro modificado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 catch (Exception ex)
@@ -109,6 +118,8 @@ namespace amdlabo4
                 MessageBox.Show("Selecciona una fila para modificar.", "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
+
+
 
 
         private void button3_Click(object sender, EventArgs e)
@@ -268,6 +279,18 @@ namespace amdlabo4
                 e.Handled = true; // Bloquear entrada no válida
             }
         }
+        private bool EsFechaValida(DateTime fecha)
+        {
+            // Compara solo la fecha
+            if (fecha >= DateTime.Today)
+            {
+                MessageBox.Show("La fecha de nacimiento no puede ser hoy o posterior.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+            return true;
+        }
+
+
 
         private void txtApellido_KeyPress(object sender, KeyPressEventArgs e)
         {
@@ -278,5 +301,54 @@ namespace amdlabo4
                 e.Handled = true; // Bloquear entrada no válida
             }
         }
+
+
+        private bool SonCamposValidos()
+        {
+            // Verificar si alguno de los campos está vacío
+            if (string.IsNullOrWhiteSpace(txtNombre.Text))
+            {
+                MessageBox.Show("El campo Nombre es obligatorio.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+            if (string.IsNullOrWhiteSpace(txtApellido.Text))
+            {
+                MessageBox.Show("El campo Apellido es obligatorio.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+            if (string.IsNullOrWhiteSpace(txtDni.Text))
+            {
+                MessageBox.Show("El campo DNI es obligatorio.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+            if (string.IsNullOrWhiteSpace(txtDomicilio.Text))
+            {
+                MessageBox.Show("El campo Domicilio es obligatorio.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+            if (dtpFechaNacimiento.Value >= DateTime.Today)
+            {
+                MessageBox.Show("La fecha de nacimiento no puede ser hoy o posterior a hoy.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            return true; // Si todos los campos son válidos
+        }
+
+
+        private bool DniUnico(string dni)
+        {
+            foreach (DataGridViewRow fila in dataGridView1.Rows)
+            {
+                // Verifica si el DNI de alguna fila es igual al ingresado
+                if (fila.Cells[3].Value?.ToString() == dni)
+                {
+                    return false; // Si encuentra un duplicado, retorna false
+                }
+            }
+            return true; // Si no hay duplicados, retorna true
+        }
+
+
     }
 }
