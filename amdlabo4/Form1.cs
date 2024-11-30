@@ -8,6 +8,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
+using System.Runtime.Remoting.Messaging;
+
+
 
 namespace amdlabo4
 {
@@ -17,57 +20,113 @@ namespace amdlabo4
         {
             InitializeComponent();
             dataGridView1.CellClick += dataGridView1_CellClick;
+
+            // Configurar la columna ID como numérica
+            dataGridView1.Columns[0].ValueType = typeof(int);
+            txtId.Enabled = false;
+            
+            
+
         }
 
-        // Evento para agregar un nuevo alumno
-        private void button1_Click(object sender, EventArgs e)
+        //=========== BOTONES ===========//
+
+        private void btnAgregar_Click(object sender, EventArgs e)
         {
-            // Guarda los datos en el archivo
+            // Validar longitud del DNI
+            if (txtDni.Text.Length != 8)
+            {
+                MessageBox.Show("El DNI debe tener exactamente 8 dígitos.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return; // Detener la ejecución si no cumple
+            }
+
+            // Validar que el DNI contenga solo números
+            if (!txtDni.Text.All(char.IsDigit))
+            {
+                MessageBox.Show("El DNI debe contener solo números.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return; // Detener la ejecución si no cumple
+            }
+
+            // Si pasa la validación, continúa con el registro
+            int nuevoId = GenerarIdSiguiente();
+
+            // Agregar los datos al DataGridView
+            dataGridView1.Rows.Add(nuevoId, txtNombre.Text, txtApellido.Text, txtDni.Text, dtpFechaNacimiento.Value.ToString("yyyy-MM-dd"), txtDomicilio.Text);
+
+            // Guardar los datos en el archivo
             GrabarDatos();
 
-            // Agrega los datos al DataGridView
-            dataGridView1.Rows.Add(txtId.Text, txtNombre.Text, txtApellido.Text, txtDni.Text, dtpFechaNacimiento.Value);
+            // Mostrar mensaje con el nuevo ID
+            MessageBox.Show($"El registro se agregó con éxito. El ID asignado es: {nuevoId}", "Registro Agregado", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-            // Limpia los campos de entrada
-            txtId.Text = "";
-            txtNombre.Text = "";
-            txtApellido.Text = "";
-            txtDni.Text = "";
-            dtpFechaNacimiento.Value = DateTime.Now;
+            LimpiarCampos();
         }
 
-        private void ActualizarArchivo()
-        {
-            using (StreamWriter archivo = new StreamWriter("alumnos.txt"))
-            {
-                foreach (DataGridViewRow fila in dataGridView1.Rows)
-                {
-                    // Ignorar filas vacías (como la última fila de edición en DataGridView)
-                    if (fila.IsNewRow) continue;
 
-                    archivo.WriteLine(fila.Cells[0].Value?.ToString() ?? ""); // ID
-                    archivo.WriteLine(fila.Cells[1].Value?.ToString() ?? ""); // Nombre
-                    archivo.WriteLine(fila.Cells[2].Value?.ToString() ?? ""); // Apellido
-                    archivo.WriteLine(fila.Cells[3].Value?.ToString() ?? ""); // DNI
-                    archivo.WriteLine(fila.Cells[4].Value?.ToString() ?? ""); // Fecha Nacimiento
+
+
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            if (dataGridView1.SelectedRows.Count > 0)
+            {
+                // Validar longitud del DNI
+                if (txtDni.Text.Length != 8)
+                {
+                    MessageBox.Show("El DNI debe tener exactamente 8 dígitos.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return; // Detener la ejecución si no cumple
+                }
+
+                // Validar que el DNI contenga solo números
+                if (!txtDni.Text.All(char.IsDigit))
+                {
+                    MessageBox.Show("El DNI debe contener solo números.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return; // Detener la ejecución si no cumple
+                }
+
+                try
+                {
+                    DataGridViewRow filaSeleccionada = dataGridView1.SelectedRows[0];
+
+                    filaSeleccionada.Cells[1].Value = txtNombre.Text;
+                    filaSeleccionada.Cells[2].Value = txtApellido.Text;
+                    filaSeleccionada.Cells[3].Value = txtDni.Text;
+                    filaSeleccionada.Cells[4].Value = dtpFechaNacimiento.Value.ToString("yyyy-MM-dd");
+                    filaSeleccionada.Cells[5].Value = txtDomicilio.Text;
+
+                    GrabarDatos();
+                    LimpiarCampos();
+
+                    MessageBox.Show("Registro modificado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ocurrió un error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            else
+            {
+                MessageBox.Show("Selecciona una fila para modificar.", "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            for (int i = 0; i < dataGridView1.Rows.Count; i++)
+            {
+                if (int.TryParse(txtId.Text, out int id) && id == Convert.ToInt32(dataGridView1.Rows[i].Cells[0].Value))
+                {
+                    dataGridView1.Rows.RemoveAt(i);
+                    GrabarDatos();
+                    LimpiarCampos();
+                    MessageBox.Show("Se borró el alumno.");
+                    break;
                 }
             }
         }
 
-        // Método para guardar datos en el archivo
-        private void GrabarDatos()
-        {
-            using (StreamWriter archivo = new StreamWriter("alumnos.txt", true))
-            {
-                archivo.WriteLine(txtId.Text);
-                archivo.WriteLine(txtNombre.Text);
-                archivo.WriteLine(txtApellido.Text);
-                archivo.WriteLine(txtDni.Text);
-                archivo.WriteLine(dtpFechaNacimiento.Value);
-            }
-        }
-
-        // Evento que se ejecuta al cargar el formulario
+        //=========== DGRID ===========//
         private void Form1_Load(object sender, EventArgs e)
         {
             // Verifica si el archivo existe, si no, lo crea vacío
@@ -85,106 +144,138 @@ namespace amdlabo4
                 {
                     while (!archivo.EndOfStream)
                     {
-                        string id = archivo.ReadLine();
-                        string nombre = archivo.ReadLine();
-                        string apellido = archivo.ReadLine();
-                        string dni = archivo.ReadLine();
-                        string fechaNacimiento = archivo.ReadLine();
-                        dataGridView1.Rows.Add(id, nombre, apellido, dni, fechaNacimiento);
+                        string idTexto = archivo.ReadLine();
+                        if (int.TryParse(idTexto, out int id))
+                        {
+                            string nombre = archivo.ReadLine();
+                            string apellido = archivo.ReadLine();
+                            string dni = archivo.ReadLine();
+                            string fechaNacimiento = archivo.ReadLine();
+                            string domicilio = archivo.ReadLine();
+
+                            dataGridView1.Rows.Add(id, nombre, apellido, dni, fechaNacimiento, domicilio);
+                        }
                     }
-                }
-            }
-        }
-
-        // Evento para eliminar un alumno por ID
-        private void button3_Click(object sender, EventArgs e)
-        {
-            // Recorre las filas del DataGridView
-            for (int i = 0; i < dataGridView1.Rows.Count; i++)
-            {
-                // Verifica si el ID ingresado coincide con el de la fila actual
-                if (txtId.Text == dataGridView1.Rows[i].Cells[0].Value.ToString())
-                {
-                    // Elimina la fila del DataGridView
-                    dataGridView1.Rows.RemoveAt(i);
-
-                    // Actualiza el archivo con los datos restantes
-                    GrabarBorrado();
-
-                    // Muestra un mensaje de confirmación
-                    MessageBox.Show("Se borró el alumno.");
-                    break; 
-                }
-            }
-        }
-
-        // Método para reescribir el archivo después de un borrado Recorre las filas 
-        private void GrabarBorrado()
-        {
-            using (StreamWriter archivo = new StreamWriter("alumnos.txt"))
-            {
-                
-                for (int i = 0; i < dataGridView1.Rows.Count; i++)
-                {
-                    archivo.WriteLine(dataGridView1.Rows[i].Cells[0].Value.ToString()); 
-                    archivo.WriteLine(dataGridView1.Rows[i].Cells[1].Value.ToString()); 
-                    archivo.WriteLine(dataGridView1.Rows[i].Cells[2].Value.ToString()); 
-                    archivo.WriteLine(dataGridView1.Rows[i].Cells[3].Value.ToString()); 
-                    archivo.WriteLine(dataGridView1.Rows[i].Cells[4].Value.ToString()); 
                 }
             }
         }
 
         private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-            // Verifica que el índice de la fila sea válido
             if (e.RowIndex >= 0)
             {
-                // Obtén la fila seleccionada
-                DataGridViewRow row = dataGridView1.Rows[e.RowIndex];
+                DataGridViewRow fila = dataGridView1.Rows[e.RowIndex];
 
-                // Asigna los valores de las celdas a los TextBox
-                txtId.Text = row.Cells["ID"].Value?.ToString();
-                txtNombre.Text = row.Cells["NOMBRE"].Value?.ToString();
-                txtApellido.Text = row.Cells["APELLIDO"].Value?.ToString();
-                txtDni.Text = row.Cells["DNI"].Value?.ToString();
-                dtpFechaNacimiento.Value = row.Cells["FechaNacimiento"].Value != null
-            ? Convert.ToDateTime(row.Cells["FechaNacimiento"].Value)
-            : DateTime.Now;
-
+                txtId.Text = fila.Cells[0].Value?.ToString();
+                txtNombre.Text = fila.Cells[1].Value?.ToString();
+                txtApellido.Text = fila.Cells[2].Value?.ToString();
+                txtDni.Text = fila.Cells[3].Value?.ToString();
+                dtpFechaNacimiento.Value = Convert.ToDateTime(fila.Cells[4].Value);
+                txtDomicilio.Text = fila.Cells[5].Value?.ToString();
             }
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        //=========== METODOS ===========//
+        private int GenerarIdSiguiente()
         {
-            // Verificar que hay una fila seleccionada
-            if (dataGridView1.SelectedRows.Count > 0)
+            // Crea una lista de todos los ID actuales en el DataGridView
+            List<int> idsExistentes = new List<int>();
+
+            foreach (DataGridViewRow fila in dataGridView1.Rows)
             {
-                try
+                if (!fila.IsNewRow)
                 {
-                    // Obtener la fila seleccionada
-                    DataGridViewRow filaSeleccionada = dataGridView1.SelectedRows[0];
-
-                    // Actualizar los datos de la fila seleccionada con los valores de los campos de texto
-                    filaSeleccionada.Cells[0].Value = txtId.Text;
-                    filaSeleccionada.Cells[1].Value = txtNombre.Text;
-                    filaSeleccionada.Cells[2].Value = txtApellido.Text;
-                    filaSeleccionada.Cells[3].Value = txtDni.Text;
-                    filaSeleccionada.Cells[4].Value = dtpFechaNacimiento.Value.ToString();
-
-                    // Actualizar el archivo de texto
-                    ActualizarArchivo();
-
-                    MessageBox.Show("Registro modificado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Ocurrió un error al modificar el registro: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    if (fila.Cells[0].Value is int id)
+                    {
+                        idsExistentes.Add(id);
+                    }
                 }
             }
-            else
+
+            // Ordena la lista para buscar el menor ID disponible
+            idsExistentes.Sort();
+
+            // Encontrar el menor ID disponible
+            int siguienteId = 1;
+            foreach (int id in idsExistentes)
             {
-                MessageBox.Show("Por favor, selecciona una fila para modificar.", "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                if (id == siguienteId)
+                {
+                    siguienteId++; // Avanzar al siguiente numero
+                }
+                else
+                {
+                    break; // ID vacio encontrado
+                }
+            }
+
+            return siguienteId; // Retornar el menor ID disponible
+        }
+
+        private void GrabarDatos()
+        {
+            using (StreamWriter archivo = new StreamWriter("alumnos.txt"))
+            {
+                foreach (DataGridViewRow fila in dataGridView1.Rows)
+                {
+                    if (!fila.IsNewRow)
+                    {
+                        archivo.WriteLine(fila.Cells[0].Value?.ToString()); // ID
+                        archivo.WriteLine(fila.Cells[1].Value?.ToString()); // Nombre
+                        archivo.WriteLine(fila.Cells[2].Value?.ToString()); // Apellido
+                        archivo.WriteLine(fila.Cells[3].Value?.ToString()); // DNI
+                        archivo.WriteLine(Convert.ToDateTime(fila.Cells[4].Value).ToString("yyyy-MM-dd")); // Fecha de nacimiento                                                                                                           
+                        archivo.WriteLine(fila.Cells[5].Value?.ToString()); // Domicilio
+                    }
+                }
+            }
+        }
+
+        private void LimpiarCampos()
+        {
+            txtNombre.Text = "";
+            txtApellido.Text = "";
+            txtDni.Text = "";
+            dtpFechaNacimiento.Value = DateTime.Now;
+            txtDomicilio.Text = "";
+            txtId.Text = "";
+        }
+
+        private void txtDni_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Permitir solo números del 0 al 9 y teclas de control como backspace
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
+            {
+                MessageBox.Show("Solo se permiten números", "Validación DNI", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                e.Handled = true; // Bloquear entrada no válida
+                return;
+            }
+
+            // Validar longitud máxima de 8 caracteres
+            if (char.IsDigit(e.KeyChar) && txtDni.Text.Length >= 8)
+            {
+                MessageBox.Show("El DNI debe tener exactamente 8 números", "Validación DNI", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                e.Handled = true; // Bloquear más caracteres
+            }
+        }
+
+        private void txtNombre_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Permitir solo letras, espacio y teclas de control (como backspace)
+            if (!char.IsControl(e.KeyChar) && !char.IsLetter(e.KeyChar) && e.KeyChar != ' ')
+            {
+                MessageBox.Show("Solo se permiten letras", "Validación Nombre", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                e.Handled = true; // Bloquear entrada no válida
+            }
+        }
+
+        private void txtApellido_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Permitir solo letras, espacio y teclas de control (como backspace)
+            if (!char.IsControl(e.KeyChar) && !char.IsLetter(e.KeyChar) && e.KeyChar != ' ')
+            {
+                MessageBox.Show("Solo se permiten letras", "Validación Nombre", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                e.Handled = true; // Bloquear entrada no válida
             }
         }
     }

@@ -1,20 +1,144 @@
-10
-peppep
-dasdadsad
-34324324324
-10/5/1993 21:37:00
-4
-pedro
-pedro
-12345345
-31/1/1990 20:29:54
-5
-martin
-tieneungato
-23135123
-12/6/1969 20:44:30
+1
+Juan
+Pérez
+12345678
+2000-05-15
+Calle Ficticia 123
 2
-asdf
-pepepe
-55689325
-15/6/1994 20:02:43
+Ana
+Gómez
+23456789
+1998-11-23
+Avenida Siempre Viva 456
+3
+Carlos
+Rodríguez
+34567890
+1999-07-02
+Callejón de la Esperanza 789
+4
+María
+Martínez
+45678901
+2001-09-17
+Avenida Libertador 101
+5
+Luis
+Fernández
+56789012
+2000-03-22
+Calle San Martín 202
+6
+Laura
+López
+67890123
+2002-12-01
+Bulevar del Sol 303
+7
+José
+Sánchez
+78901234
+1997-04-05
+Calle Mayor 404
+8
+Pedro
+García
+89012345
+2000-06-18
+Calle Los Álamos 505
+9
+Patricia
+Hernández
+90123456
+1998-08-30
+Avenida del Mar 606
+10
+Raúl
+Jiménez
+10123456
+1999-01-10
+Avenida de los Álamos 707
+11
+Silvia
+Vásquez
+11234567
+2001-02-25
+Calle de la Paz 808
+12
+David
+Ramírez
+12345678
+2000-04-11
+Avenida Las Palmas 909
+13
+Cristinaaaaaaaa
+Torres
+134567
+1997-12-20
+Calle del Río 1010
+14
+Héctor
+Morales
+14567890
+1999-10-14
+Calle Buenos Aires 1111
+15
+Isabel
+Muñoz
+15678901
+2002-05-30
+Avenida San José 1212
+16
+Fernando
+Díaz
+16789012
+2000-07-22
+Calle del Sol 1313
+17
+Elena
+Álvarez
+17890123
+1998-02-10
+Calle Norte 1414
+18
+Óscar
+Castro
+18901234
+1999-11-03
+Calle del Mar 1515
+19
+Victoria
+Jiménez
+19012345
+2001-08-25
+Calle las Flores 1616
+20
+Carlos
+Gutiérrez
+20123456
+2000-09-09
+Avenida Río 1717
+21
+asddasdasd
+1231
+12345678
+2024-11-30
+dasda 2121
+22
+aaaaaaaaa
+aaaaaaaaa
+2222
+2024-11-30
+asdasda 21231
+23
+ddsadasd
+dasda
+12132132
+2024-11-30
+asdasda 2121
+24
+dsadasda
+dsadsad
+66666666
+2024-11-30
+dsadsadsad 1212
