@@ -34,7 +34,7 @@ namespace amdlabo4
         private void btnAgregar_Click(object sender, EventArgs e)
         {
             // Validar que todos los campos tengan datos
-            if (!SonCamposValidos())
+            if (!CamposValidos())
             {
                 return; // Detener si hay campos vacíos o incorrectos
             }
@@ -71,7 +71,7 @@ namespace amdlabo4
         private void button2_Click(object sender, EventArgs e)
         {
             // Validar que todos los campos tengan datos
-            if (!SonCamposValidos())
+            if (!CamposValidos())
             {
                 return; // Detener si hay campos vacíos o incorrectos
             }
@@ -303,7 +303,7 @@ namespace amdlabo4
         }
 
 
-        private bool SonCamposValidos()
+        private bool CamposValidos()
         {
             // Verificar si alguno de los campos está vacío
             if (string.IsNullOrWhiteSpace(txtNombre.Text))
@@ -321,6 +321,11 @@ namespace amdlabo4
                 MessageBox.Show("El campo DNI es obligatorio.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
+            if (txtDni.Text.Length != 8 || !txtDni.Text.All(char.IsDigit))
+            {
+                MessageBox.Show("El DNI debe tener exactamente 8 dígitos numéricos.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
             if (string.IsNullOrWhiteSpace(txtDomicilio.Text))
             {
                 MessageBox.Show("El campo Domicilio es obligatorio.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -334,6 +339,7 @@ namespace amdlabo4
 
             return true; // Si todos los campos son válidos
         }
+
 
 
         private bool DniUnico(string dni)
