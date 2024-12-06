@@ -76,6 +76,20 @@ namespace amdlabo4
                 return; // Detener si hay campos vacíos o incorrectos
             }
 
+            // Validar que haya una fila seleccionada
+            if (dataGridView1.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("Por favor, selecciona una fila antes de modificar.", "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Validar el DNI antes de continuar
+            if (txtDni.Text.Length != 8 || !txtDni.Text.All(char.IsDigit))
+            {
+                MessageBox.Show("El DNI debe tener exactamente 8 dígitos numéricos.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             // Verificar si el DNI es único, pero solo si se ha cambiado
             if (txtDni.Text != dataGridView1.SelectedRows[0].Cells[3].Value?.ToString())
             {
@@ -86,38 +100,39 @@ namespace amdlabo4
                 }
             }
 
-            if (dataGridView1.SelectedRows.Count > 0)
+            try
             {
-                // Validar el DNI
-                if (txtDni.Text.Length != 8 || !txtDni.Text.All(char.IsDigit))
+                // Recuperar la fila seleccionada y validar que no haya celdas nulas
+                DataGridViewRow filaSeleccionada = dataGridView1.SelectedRows[0];
+                if (filaSeleccionada.Cells[1].Value == null || filaSeleccionada.Cells[2].Value == null ||
+                    filaSeleccionada.Cells[3].Value == null || filaSeleccionada.Cells[4].Value == null ||
+                    filaSeleccionada.Cells[5].Value == null)
                 {
-                    MessageBox.Show("El DNI debe tener exactamente 8 dígitos numéricos.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("La fila seleccionada contiene datos incompletos o inválidos.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
-                try
-                {
-                    DataGridViewRow filaSeleccionada = dataGridView1.SelectedRows[0];
-                    filaSeleccionada.Cells[1].Value = txtNombre.Text;
-                    filaSeleccionada.Cells[2].Value = txtApellido.Text;
-                    filaSeleccionada.Cells[3].Value = txtDni.Text;
-                    filaSeleccionada.Cells[4].Value = dtpFechaNacimiento.Value.ToString("yyyy-MM-dd");
-                    filaSeleccionada.Cells[5].Value = txtDomicilio.Text;
+                // Modificar los valores de la fila seleccionada
+                filaSeleccionada.Cells[1].Value = txtNombre.Text;
+                filaSeleccionada.Cells[2].Value = txtApellido.Text;
+                filaSeleccionada.Cells[3].Value = txtDni.Text;
+                filaSeleccionada.Cells[4].Value = dtpFechaNacimiento.Value.ToString("yyyy-MM-dd");
+                filaSeleccionada.Cells[5].Value = txtDomicilio.Text;
 
-                    GrabarDatos();
-                    LimpiarCampos();
-                    MessageBox.Show("Registro modificado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Ocurrió un error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                GrabarDatos();
+                LimpiarCampos();
+                MessageBox.Show("Registro modificado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-            else
+            catch (ArgumentOutOfRangeException ex)
             {
-                MessageBox.Show("Selecciona una fila para modificar.", "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show($"Error al acceder a una celda: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ocurrió un error inesperado: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
 
 
 
@@ -225,32 +240,45 @@ namespace amdlabo4
 
         private void GrabarDatos()
         {
-            using (StreamWriter archivo = new StreamWriter("alumnos.txt"))
+            try
             {
-                foreach (DataGridViewRow fila in dataGridView1.Rows)
+                using (StreamWriter archivo = new StreamWriter("alumnos.txt"))
                 {
-                    if (!fila.IsNewRow)
+                    foreach (DataGridViewRow fila in dataGridView1.Rows)
                     {
-                        archivo.WriteLine(fila.Cells[0].Value?.ToString()); // ID
-                        archivo.WriteLine(fila.Cells[1].Value?.ToString()); // Nombre
-                        archivo.WriteLine(fila.Cells[2].Value?.ToString()); // Apellido
-                        archivo.WriteLine(fila.Cells[3].Value?.ToString()); // DNI
-                        archivo.WriteLine(Convert.ToDateTime(fila.Cells[4].Value).ToString("yyyy-MM-dd")); // Fecha de nacimiento                                                                                                           
-                        archivo.WriteLine(fila.Cells[5].Value?.ToString()); // Domicilio
+                        if (!fila.IsNewRow)
+                        {
+                            archivo.WriteLine(fila.Cells[0].Value?.ToString()); // ID
+                            archivo.WriteLine(fila.Cells[1].Value?.ToString()); // Nombre
+                            archivo.WriteLine(fila.Cells[2].Value?.ToString()); // Apellido
+                            archivo.WriteLine(fila.Cells[3].Value?.ToString()); // DNI
+                            archivo.WriteLine(Convert.ToDateTime(fila.Cells[4].Value).ToString("yyyy-MM-dd")); // Fecha de nacimiento
+                            archivo.WriteLine(fila.Cells[5].Value?.ToString()); // Domicilio
+                        }
                     }
                 }
             }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                MessageBox.Show($"Error al acceder a una celda: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (IOException ex)
+            {
+                MessageBox.Show($"Error al escribir el archivo: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
+
 
         private void LimpiarCampos()
         {
-            txtNombre.Text = "";
-            txtApellido.Text = "";
-            txtDni.Text = "";
-            dtpFechaNacimiento.Value = DateTime.Now;
-            txtDomicilio.Text = "";
-            txtId.Text = "";
+            txtId.Clear();
+            txtNombre.Clear();
+            txtApellido.Clear();
+            txtDni.Clear();
+            txtDomicilio.Clear();
+            dtpFechaNacimiento.Value = DateTime.Now; 
         }
+
 
         private void txtDni_KeyPress(object sender, KeyPressEventArgs e)
         {
@@ -355,6 +383,9 @@ namespace amdlabo4
             return true; // Si no hay duplicados, retorna true
         }
 
-
+        private void btnLimpiar_Click(object sender, EventArgs e)
+        {
+            LimpiarCampos();
+        }
     }
 }
